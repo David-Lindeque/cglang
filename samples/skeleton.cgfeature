@@ -1,0 +1,32 @@
+# implementation of steps
+
+%file
+{
+#include <blabla>
+
+$finit
+
+$tests
+}
+
+%test
+{
+TEST($feature, $scenario)
+{
+    $tinit
+    $steps
+    _->check_memory();
+}
+}
+
+'I have an account with account number \'(.+)\' and \$(\d+) of cash'
+{
+    _->open_account("$1", $2);
+}
+
+%case = insensitive
+
+'I transfer \$(\d+) from \'(.+)\' to \'(.+)\''
+{
+    _->transfer($1, "$2", "$3");
+}

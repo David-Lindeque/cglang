@@ -1,0 +1,69 @@
+%import <gtest>
+
+%define headers
+{
+$headers
+// instruments.s.cgfeature
+#include <bsl_unorderedmap.h>
+#include <bsl_string.h>
+#include <dlibcoretypes_model.h>
+#include <dlibdealapi_contractapifactory.h>
+#include <dlibdealapi_lexificontractapi.h>
+}
+
+%define helpers
+{
+$helpers
+
+// instruments.s.cgfeature
+void load_equities(
+    bsl::unordered_map<bsl::string, ContractApi::Underlying> &underlyings,
+    const cglang::utils::table<3> &data)
+{
+    for(size_t r = 0; r < data.rows(); r++) {
+        underlyings.emplace(
+            data.get(r, "name"), 
+            dlibdealapi::ContractApi::Equity(data.get(r, "ticker"), data.get(r, "currency")));
+    }
+}
+
+void load_libor_rates(
+    bsl::unordered_map<bsl::string, ContractApi::Underlying> &underlyings,
+    const cglang::utils::table<4> &data)
+{
+    for(size_t r = 0; r < data.rows(); r++) {
+        underlyings.emplace(
+            data.get(r, "name"), 
+            dlibdealapi::ContractApi::Libor(
+                data.get(r, "ticker"), 
+                dlibcoretypes::BBSecurity::Libor(
+                    data.get(r, "tenor"), 
+                    data.get(r, "currency"))));
+    }
+}
+
+void load_instruments(
+    bsl::unordered_map<bsl::string, ContractApi::Underlying> &underlyings,
+    bsl::vector<ContractApi::Underlying> &loaded_instruments,
+    const cglang::utils::table<1> &data)
+{
+    for(size_t r = 0; r < data.rows(); r++) {
+        auto f = underlyings.find(data.get(r, "instrument"));
+        ASSERT_TRUE(f != underlyings.end());
+        loaded_instruments.push_back(f.second);
+    }
+}
+
+}
+
+%define test_setup
+{
+    $test_setup
+    // instruments.s.cgfeature
+    bsl::unordered_map<bsl::string, ContractApi::Underlying> underlyings;
+    bsl::vector<ContractApi::Underlying> loaded_instruments;
+}
+
+'the following equities' { load_equities(underlyings, $0); }
+'the following libor rates' { load_libor_rates(underlyings, $0); }
+'the following instruments' { load_instruments(underlyings, loaded_instruments, $0); }

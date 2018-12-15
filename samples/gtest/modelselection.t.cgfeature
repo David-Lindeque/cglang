@@ -1,0 +1,50 @@
+%import <modelselection.s>
+
+Feature: ModelSelectionTest
+
+Background:
+    Given the following equities
+    | name | ticker         | currency |
+    | IBM  | IBM US Equity  | USD      |
+    | MSFT | MSFT US Equity | USD      |
+    | SPX  | SPX Index      | USD      |
+    | SX5E | SX5E Index     | EUR      |
+    And the following libor rates
+    | name    | ticker        | currency | tenor |
+    | US0003M | US0003M Index | USD      | 3M    |
+    And an as-of-date of '2014-10-09'
+    And an expiry date of '2014-11-08'
+
+Scenario: modelSelectionEQBasketIRSingleCcy
+    Given the following instruments
+    | instrument |
+    | IBM        |
+    | MSFT       |
+    | US0003M    |
+    When I select the models for the following payment currencies
+    | currency |
+    | USD      |
+    Then I do not expect any warnings
+    And I expect the following models
+    | model                   |
+    | HULL_WHITE_1F_BS_BASKET |
+    | HULL_WHITE_1F_LV        |
+    | LOCAL_VOLATILITY        |
+    | BLACK_SCHOLES           |
+    | HULL_WHITE_2F_BS_BASKET |
+    | HULL_WHITE_2F_LV        |
+
+Scenario: modelSelectionEQBasketIRMultipleCcy
+    Given the following instruments
+    | instrument |
+    | SPX        |
+    | SX5E       |
+    | US0003M    |
+    When I select the models for the following payment currencies
+    | currency |
+    | USD      |
+    Then I do not expect any warnings
+    And I expect the following models
+    | model            |
+    | LOCAL_VOLATILITY |
+    | BLACK_SCHOLES    |

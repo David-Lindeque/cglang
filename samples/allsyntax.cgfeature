@@ -1,0 +1,97 @@
+# Comments
+
+%define finit
+{
+    
+class bank_test_adapter {
+private:
+    std::unique_ptr<bank> _bank;
+public:
+    bank_test_adapter(std::unique_ptr<bank> &&bank)
+    : _bank(std::move(bank))
+    {}
+
+    void open_account(const char *account, int deposit)
+    {
+        if (!_bank.try_open_account(account, deposit))
+        {
+            FAIL("Failure opening a bank account { with brackets in strings }");
+        }
+        if (account[0] == '}') FAIL("Brackets in chars");
+        // We also allow } brackets in comments.
+        /*
+            Even in block comments }
+        */
+    }
+};
+
+}
+
+%define tinit
+{
+    std::unique_ptr<bank_test_adapter> _(new bank_test_adapter(std::make_unique<bank>()));
+}
+
+%import </Users/dlindeque/personal/cglang/samples/skeleton.cgfeature>
+
+Feature: # Multi-line feature declaration
+    FeatureNameIdentifier # no line terminator
+
+%grammar = ECMAScript # basic, extended, awk, grep, egrep
+
+'I expect a balance in \'(\w+)\' of \$(\d+)'
+{
+    _->assert_balance("$1", $2);
+}
+
+%case = sensitive
+
+'I close account \'(\w+)\''
+{
+    _->close_account("$1");
+}
+
+'I expect a payout of \$(\d+)' { _->assert_payout($1); }
+'I expect a note with context' { _->assert_note($0); }
+'I request a statement for account \'(\w+)\'' { _->request_statement("$1"); }
+'I expect the following transactions' { _->assert_transactions($0); }
+'I expect a note with content' { _->assert_note($0); }
+
+Background:
+    Given I have an account with account number '12345' and $100 of cash
+
+Scenario Outline: ScenarioOutlineNameIdentifier
+    Given I have an account with account number '54321' and $100 of cash
+    When I transfer <amt> from '<src>' to '<dst>'
+    Then I expect a balance in '12345' of <bal1>
+    And I expect a balance in '54321' of <bal2>
+
+Examples:
+    | id  | amt | src   | dst   | bal1 | bal2 |
+    | a2b | $10 | 磨    | 54321 | $90  | $110 |
+    | b2a | $10 | 54321 | 12345 | $110 | $90  |
+    | a2a | $5  | 12345 | 12345 | $100 | $100 |
+
+Scenario: ScenarioNameIdentifier
+    When I close account '12345'
+    Then I expect a payout of $100
+    And I expect a note with content
+    """
+    Account 12345 closure
+     We do like our \""" quotes.
+    Also not processing escapes line \n except \t.
+    Thanks "Mr 磨 Smith""""
+
+Scenario: AccountStatement
+    Given I have an account with account number '54321' and $0 of cash
+    And I have an account with account number '11111' and $0 of cash
+    When I transfer $25 from '12345' to '54321'
+    And I transfer $10 from '12345' to '11111'
+    And I transfer $12 from '54321' to '12345'
+    When I request a statement for account '12345'
+    Then I expect the following transactions
+    | Description           | Amount |
+    | Transfer to '54321'   | -25    |
+    | Transfer to '11111'   | -10    | # Commment behind table row
+    | Transfer from '54321' | 12     |
+    | Balance  磨            | 77     |

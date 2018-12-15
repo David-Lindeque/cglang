@@ -1,0 +1,37 @@
+%import <gtest>
+%import <instruments.s>
+
+%define headers
+{
+$headers
+
+// modelselection.s.cgfeature
+#include <bsl_unordered_map.h>
+#include <dlibcoretypes_model.h>
+#include <dlibdealapi_contractapifactory.h>
+#include <dlibdealapi_lexificontractapi.h>
+}
+
+%define test_setup
+{
+    $test_setup
+
+    // modelselection.s.cgfeature
+    bde::Date asOfDate;
+    bde::Date expiryDate;
+    bsl::vector<bsl::string> warnings;
+    bsl::vector<bsl::string> models;
+}
+
+'an as-of date of \'(\d{4})-(\d{2})-(\d{2})\'' { asOfDate.set($1, $2, $3); }
+'an expiry date of \'(\d{4})-(\d{2})-(\d{2})\'' { expiryDate.set($1, $2, $3); }
+'I select the models for the following payment currencies'
+{
+    bsl::vector<bsl::string> currencies;
+    for(size_t r = 0; r < $0.rows(); r++) {
+        currencies.push_back($0.get(r, "currency"));
+    }
+    select_models(asOfDate, expiryDate, loaded_instruments, currencies, models, warnings);
+}
+'I do not expect any warnings' { ASSERT_EQ(0, warnings.size()); }
+'I expect the following models' { $0.assert_equivalent(models.begin(), models.end()); }

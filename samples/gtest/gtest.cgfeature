@@ -1,0 +1,55 @@
+# This is my gtest skeleton
+
+%define headers
+{
+}
+
+%define helpers
+{
+}
+
+%define test_setup
+{
+}
+
+%file
+{
+// gtest.cgfeature
+#include <gtest>
+$headers
+
+using namespace BloombergLP;
+
+namespace { // Anon ns for helpers
+
+namespace { const char LOG_CATEGORY[] = "$FEATURE_GTEST"; }
+
+$helpers
+
+} // anonymous namespace
+
+namespace gtest { // Open the namespace for this module
+
+$tests
+
+}
+
+}
+
+%test
+{
+
+TEST($feature, $scenario)
+{
+    $test_setup
+
+    try
+    {
+        $steps
+    }
+    catch(std::exception ex) {
+        FAIL(ex.what());
+    }
+}
+
+}
