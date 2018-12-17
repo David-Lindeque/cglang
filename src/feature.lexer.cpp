@@ -423,6 +423,10 @@ int read_cell()
                     case (wint_t)L'#':
                         unread((wint_t)L'#');
                         return TOK_ROW_END;
+                    case (wint_t)L'|': // Empty cell
+                        unread(L'|');
+                        yylval.str = buf.take();
+                        return TOK_CELL;
                     default:
                         buf.append((wchar_t)v);
                         state = 1;

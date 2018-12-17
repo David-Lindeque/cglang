@@ -30,7 +30,7 @@ bool try_process_file(const char *fn, FILE *f, TProcessor *processor)
     bool ok = true;
     cglang::ostream_logger log(fn, std::cout, std::cout, std::cerr);
     {
-        typename TProcessor::Parser parser(&log, ok, processor);
+        typename TProcessor::Parser parser(fn, &log, ok, processor);
         cglang::parser::parse(&parser, f);
     }
     return ok;

@@ -5,8 +5,8 @@
 namespace cglang
 {
 
-code_generator_parser::code_generator_parser(logger *logger, bool &ok, code_generator *cg)
-: parser(logger, ok), _cg(cg)
+code_generator_parser::code_generator_parser(const char *fn, logger *logger, bool &ok, code_generator *cg)
+: parser(logger, ok), _cg(cg), _fn(fn)
 {}
 
 code_generator_parser::~code_generator_parser()
@@ -53,7 +53,7 @@ void code_generator_parser::process_file_skeleton_declaration(const wchar_t *cpp
         _logger->write_error(_outline_loc, "Missing Examples: clause");
         _ok = false;
     }
-    _ok &= _cg->try_set_file_skeleton(_logger, cpp, loc);
+    _ok &= _cg->try_set_file_skeleton(_fn, _logger, cpp, loc);
 }
 
 void code_generator_parser::process_test_skeleton_declaration(const wchar_t *cpp, const location &loc)
@@ -62,7 +62,7 @@ void code_generator_parser::process_test_skeleton_declaration(const wchar_t *cpp
         _logger->write_error(_outline_loc, "Missing Examples: clause");
         _ok = false;
     }
-    _ok &= _cg->try_set_test_skeleton(_logger, cpp, loc);
+    _ok &= _cg->try_set_test_skeleton(_fn, _logger, cpp, loc);
 }
 
 void code_generator_parser::process_define_skeleton_declaration(const wchar_t *name, const location &name_loc, const wchar_t *cpp, const location &cpp_loc)
@@ -71,7 +71,7 @@ void code_generator_parser::process_define_skeleton_declaration(const wchar_t *n
         _logger->write_error(_outline_loc, "Missing Examples: clause");
         _ok = false;
     }
-    _ok &= _cg->try_set_define_skeleton(_logger, name, name_loc, cpp, cpp_loc);
+    _ok &= _cg->try_set_define_skeleton(_fn, _logger, name, name_loc, cpp, cpp_loc);
 }
 
 void code_generator_parser::process_step_skeleton_declaration(const wchar_t *pattern, const location &pattern_loc, const wchar_t *cpp, const location &cpp_loc)
@@ -80,7 +80,7 @@ void code_generator_parser::process_step_skeleton_declaration(const wchar_t *pat
         _logger->write_error(_outline_loc, "Missing Examples: clause");
         _ok = false;
     }
-    _ok &= _cg->try_add_step_skeleton(_logger, pattern, pattern_loc, cpp, cpp_loc);
+    _ok &= _cg->try_add_step_skeleton(_fn, _logger, pattern, pattern_loc, cpp, cpp_loc);
 }
 
 void code_generator_parser::process_background_declaration(psteps &&steps, const location &loc)
@@ -109,13 +109,38 @@ void code_generator_parser::process_scenario_outline_declaration(const wchar_t *
     _outline_loc = name_loc;
 }
 
-void strrep(std::wstring& str, std::wstring find, std::wstring replace)
+bool strrep(std::wstring& str, const std::wstring &find, const std::wstring &replace)
 {
+    bool found = false;
 	size_t n = str.find(find);
 	while( n != std::wstring::npos) {
+        found = true;
 		str.replace(n, find.size(), replace);
 		n = str.find(find, n + find.size());
 	}
+    return found;
+}
+
+void strrep_with_reset(std::wstring& str, const std::wstring &find, const std::wstring &replace, const std::string &reset_fn, const location &reset_loc)
+{
+    // Replace each occurrence of 'find' with 'replace', but then add a nl and #line statement using reset_fn and reset_loc
+    std::wstringstream src(str);
+    std::wstringstream res;
+    int line = reset_loc.first_line;
+    std::wstring text;
+    while(std::getline(src, text)) {
+        if (strrep(text, find, replace)) {
+            // append the reset
+            line--;
+            res << text;
+            res << std::endl << L"r #line " << line << L" \"" << std::wstring(reset_fn.begin(), reset_fn.end()) << L"\"" << std::endl;
+        }
+        else {
+            res << text << std::endl;
+        }
+        line++;
+    }
+    str = res.str();
 }
 
 void code_generator_parser::process_examples_declaration(table &&table, const location &loc)
@@ -217,18 +242,19 @@ void code_generator_parser::process_scenario_declaration(const wchar_t *name, co
     _ok &= _cg->try_add_test(_logger, name, name_loc, cpps); // Error would be logged
 }
 
-void code_generator::replace_std_tokens(std::wstring &result)
+void code_generator::replace_std_tokens(std::wstring &text, const std::string &fn, const location &loc)
 {
-    for(auto &d : _defines) {
-        strrep(result, (L"$" + d.first).c_str(), d.second);
+    for(auto &d : _defines) { 
+        strrep_with_reset(text, (L"$" + d.first).c_str(), d.second, fn, loc);
     }
-    strrep(result, L"$feature", _feature_name);
+
+    strrep(text, L"$feature", _feature_name);
     std::locale locl;
     std::wstring tmp;
     for(auto &ch : _feature_name) {
         tmp += std::toupper(ch, locl);
     }
-    strrep(result, L"$FEATURE", tmp);
+    strrep(text, L"$FEATURE", tmp);
 }
 
 void code_generator::set_grammar(const std::regex_constants::syntax_option_type &grammar)
@@ -241,12 +267,14 @@ void code_generator::set_case_sensitive(bool sensitive)
     _case_sensitive = sensitive;
 }
 
-bool code_generator::try_set_file_skeleton(logger *logger, const wchar_t *cpp, const location &loc)
+bool code_generator::try_set_file_skeleton(const std::string &fn, logger *logger, const wchar_t *cpp, const location &loc)
 {
     if (_file_skeleton.empty()) {
         std::wstringstream stm;
-        stm << "#line " << loc.first_line << " \"file\"" << std::endl << cpp;
+        stm << std::endl << L"#line " << loc.first_line << L" \"" << std::wstring(fn.begin(), fn.end()) << L"\"" << std::endl << cpp;
         _file_skeleton = stm.str();
+        _file_skeleton_fn = fn;
+        _file_skeleton_loc = loc;
         return true;
     }
     else {
@@ -255,10 +283,14 @@ bool code_generator::try_set_file_skeleton(logger *logger, const wchar_t *cpp, c
     }
 }
 
-bool code_generator::try_set_test_skeleton(logger *logger, const wchar_t *cpp, const location &loc)
+bool code_generator::try_set_test_skeleton(const std::string &fn, logger *logger, const wchar_t *cpp, const location &loc)
 {
     if (_test_skeleton.empty()) {
-        _test_skeleton = cpp;
+        std::wstringstream stm;
+        stm << std::endl << L"#line " << loc.first_line << L" \"" << std::wstring(fn.begin(), fn.end()) << L"\"" << std::endl << cpp;
+        _test_skeleton = stm.str();
+        _test_skeleton_fn = fn;
+        _test_skeleton_loc = loc;
         return true;
     }
     else {
@@ -267,7 +299,7 @@ bool code_generator::try_set_test_skeleton(logger *logger, const wchar_t *cpp, c
     }
 }
 
-bool code_generator::try_add_step_skeleton(logger *logger, const wchar_t *pattern, const location &pattern_loc, const wchar_t *cpp, const location &cpp_loc)
+bool code_generator::try_add_step_skeleton(const std::string &fn, logger *logger, const wchar_t *pattern, const location &pattern_loc, const wchar_t *cpp, const location &cpp_loc)
 {
     std::wregex re;
     std::regex::flag_type flags(_grammar);
@@ -280,14 +312,19 @@ bool code_generator::try_add_step_skeleton(logger *logger, const wchar_t *patter
         logger->write_error(pattern_loc, ex.what());
         return false;
     }
-    _step_skeletons.push_back(code_generator::step { std::move(re), pattern_loc, cpp });
+
+    std::wstringstream stm;
+    stm << std::endl << L"#line " << cpp_loc.first_line << L" \"" << std::wstring(fn.begin(), fn.end()) << L"\"" << std::endl << cpp;
+    _step_skeletons.push_back(code_generator::step { std::move(re), pattern_loc, stm.str() });
     return true;
 }
 
-bool code_generator::try_set_define_skeleton(logger *logger, const wchar_t *name, const location &name_loc, const wchar_t *cpp, const location &cpp_loc)
+bool code_generator::try_set_define_skeleton(const std::string &fn, logger *logger, const wchar_t *name, const location &name_loc, const wchar_t *cpp, const location &cpp_loc)
 {
-    std::wstring text(cpp);
-    replace_std_tokens(text);
+    std::wstringstream stm;
+    stm << std::endl << L"#line " << cpp_loc.first_line << L" \"" << std::wstring(fn.begin(), fn.end()) << L"\"" << std::endl << cpp;
+    std::wstring text;
+    replace_std_tokens(text, fn, cpp_loc);
     auto f = _defines.emplace(name, text);
     if (!f.second) f.first->second = text;
     return true;
@@ -447,7 +484,7 @@ bool code_generator::try_add_test(logger *logger, const wchar_t *scenario_name, 
     }
     
     std::wstring test(_test_skeleton);
-    replace_std_tokens(test);
+    replace_std_tokens(test, _test_skeleton_fn, _test_skeleton_loc);
     strrep(test, L"$scenario", scenario_name);
     std::wstring steps;
     for(auto &step : step_cpps) {
@@ -456,7 +493,7 @@ bool code_generator::try_add_test(logger *logger, const wchar_t *scenario_name, 
         steps.append(L"\n");
     }
     test.append(L"\n");
-    strrep(test, L"$steps", steps);
+    strrep_with_reset(test, L"$steps", steps, _test_skeleton_fn, _test_skeleton_loc);
     _tests.append(test);
 
     return true;
@@ -473,8 +510,7 @@ bool code_generator::try_write_file(std::ostream &err, FILE* f)
         return false;
     }
     std::wstring content(_file_skeleton);
-    replace_std_tokens(content);
-    strrep(content, L"$tests", _tests);
+    strrep_with_reset(content, L"$tests", _tests, _file_skeleton_fn, _file_skeleton_loc);
     fwprintf(f, L"%ls", content.c_str());
     return true;
 }

@@ -95,3 +95,4 @@ Scenario: AccountStatement
     | Transfer to '11111'   | -10    | # Commment behind table row
     | Transfer from '54321' | 12     |
     | Balance  磨            | 77     |
+    |                        | x      |

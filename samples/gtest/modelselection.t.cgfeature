@@ -12,7 +12,7 @@ Background:
     And the following libor rates
     | name    | ticker        | currency | tenor |
     | US0003M | US0003M Index | USD      | 3M    |
-    And an as-of-date of '2014-10-09'
+    And an as-of date of '2014-10-09'
     And an expiry date of '2014-11-08'
 
 Scenario: modelSelectionEQBasketIRSingleCcy
@@ -48,3 +48,4 @@ Scenario: modelSelectionEQBasketIRMultipleCcy
     | model            |
     | LOCAL_VOLATILITY |
     | BLACK_SCHOLES    |
+    |                  |

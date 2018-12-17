@@ -6,7 +6,7 @@
 namespace cglang
 {
 
-import_parser::import_parser(logger *logger, bool &ok, import_graph *ig)
+import_parser::import_parser(const char *fn, logger *logger, bool &ok, import_graph *ig)
 : parser(logger, ok), _ig(ig)
 {}
 

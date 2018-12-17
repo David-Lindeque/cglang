@@ -16,7 +16,11 @@ namespace cglang
         bool _case_sensitive = true;
 
         std::wstring _file_skeleton;
+        std::string _file_skeleton_fn;
+        location _file_skeleton_loc;
         std::wstring _test_skeleton;
+        std::string _test_skeleton_fn;
+        location _test_skeleton_loc;
         std::unordered_map<std::wstring, std::wstring> _defines;
         struct step {
             std::wregex _re;
@@ -28,7 +32,7 @@ namespace cglang
         std::wstring _feature_name;
 
         std::wstring _tests;
-        void replace_std_tokens(std::wstring &result);
+        void replace_std_tokens(std::wstring &text, const std::string &fn, const location &loc);
     public:
         typedef code_generator_parser Parser;
 
@@ -37,10 +41,10 @@ namespace cglang
         void set_grammar(const std::regex_constants::syntax_option_type &grammar);
         void set_case_sensitive(bool sensitive);
         
-        bool try_set_file_skeleton(logger *logger, const wchar_t *cpp, const location &loc);
-        bool try_set_test_skeleton(logger *logger, const wchar_t *cpp, const location &loc);
-        bool try_add_step_skeleton(logger *logger, const wchar_t *pattern, const location &pattern_loc, const wchar_t *cpp, const location &cpp_loc);
-        bool try_set_define_skeleton(logger *logger, const wchar_t *name, const location &name_loc, const wchar_t *cpp, const location &cpp_loc);
+        bool try_set_file_skeleton(const std::string &fn, logger *logger, const wchar_t *cpp, const location &loc);
+        bool try_set_test_skeleton(const std::string &fn, logger *logger, const wchar_t *cpp, const location &loc);
+        bool try_add_step_skeleton(const std::string &fn, logger *logger, const wchar_t *pattern, const location &pattern_loc, const wchar_t *cpp, const location &cpp_loc);
+        bool try_set_define_skeleton(const std::string &fn, logger *logger, const wchar_t *name, const location &name_loc, const wchar_t *cpp, const location &cpp_loc);
         
         bool try_set_feature(logger* logger, const wchar_t *feature_name, const location &loc);
         
@@ -57,11 +61,12 @@ namespace cglang
         std::wstring _outline_name;
         psteps _outline_steps;
         location _outline_loc;
+        std::string _fn;
     public:
         code_generator_parser() = delete;
         code_generator_parser(const code_generator_parser&) = delete;
         code_generator_parser(code_generator_parser&&) = delete;
-        explicit code_generator_parser(logger *logger, bool &ok, code_generator *cg);
+        explicit code_generator_parser(const char *fn, logger *logger, bool &ok, code_generator *cg);
         virtual ~code_generator_parser();
 
         code_generator_parser& operator=(const code_generator_parser&) = delete;

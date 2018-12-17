@@ -57,7 +57,7 @@ namespace cglang
         import_parser() = delete;
         import_parser(const import_parser&) = delete;
         import_parser(import_parser&&) = delete;
-        explicit import_parser(logger *logger, bool &ok, import_graph *ig);
+        explicit import_parser(const char *fn, logger *logger, bool &ok, import_graph *ig);
         virtual ~import_parser();
 
         import_parser& operator=(const import_parser&) = delete;
