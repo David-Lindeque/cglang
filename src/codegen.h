@@ -5,6 +5,7 @@
 #include <vector>
 #include <regex>
 #include <unordered_map>
+#include <ostream>
 
 namespace cglang
 {
@@ -15,24 +16,26 @@ namespace cglang
         std::regex_constants::syntax_option_type _grammar = std::regex_constants::syntax_option_type::ECMAScript;
         bool _case_sensitive = true;
 
-        std::wstring _file_skeleton;
-        std::string _file_skeleton_fn;
-        location _file_skeleton_loc;
-        std::wstring _test_skeleton;
-        std::string _test_skeleton_fn;
-        location _test_skeleton_loc;
+        struct span {
+            std::wstring _text;
+            std::string _fn;
+            int _line;
+        };
+
+        span _file_skeleton;
+        span _test_skeleton;
         std::unordered_map<std::wstring, std::wstring> _defines;
+
         struct step {
             std::wregex _re;
             location _loc;
-            std::wstring _cpp;
+            span _text;
         };
         std::vector<step> _step_skeletons;
 
         std::wstring _feature_name;
-
         std::wstring _tests;
-        void replace_std_tokens(std::wstring &text, const std::string &fn, const location &loc);
+        void write_skeleton(std::wostream &stm, const span &text, const std::unordered_map<std::wstring, std::wstring> &singe_line_tokens = std::unordered_map<std::wstring, std::wstring>(), const std::unordered_map<std::wstring, std::wstring> &multi_line_tokens = std::unordered_map<std::wstring, std::wstring>());
     public:
         typedef code_generator_parser Parser;
 
@@ -48,7 +51,7 @@ namespace cglang
         
         bool try_set_feature(logger* logger, const wchar_t *feature_name, const location &loc);
         
-        bool try_get_step_cpp(logger *logger, std::wstring &cpp, const pstep &step, const std::function<std::wstring(const std::wstring&)> &prepare);
+        bool try_get_step_cpp(const wchar_t *scenario_name, logger *logger, std::wstring &cpp, const pstep &step, const std::function<std::wstring(const std::wstring&)> &prepare);
         bool try_add_test(logger* logger, const wchar_t *scenario_name, const location &loc, const std::vector<std::wstring> &step_cpps);
 
         bool try_write_file(std::ostream &err, FILE* f);

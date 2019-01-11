@@ -15,7 +15,9 @@
         "iostream": "cpp",
         "vector": "cpp",
         "functional": "cpp",
-        "iosfwd": "cpp"
+        "iosfwd": "cpp",
+        "unordered_map": "cpp",
+        "string": "cpp"
     },
     "files.exclude": {
         "bin": true

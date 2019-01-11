@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/bin/cglang",
-            "args": [ "${workspaceFolder}/samples/allsyntax.cgfeature" ],
+            "args": [ "${workspaceFolder}/samples/gtest/modelselection.t.cgfeature" ],
             "stopAtEntry": true,
             "cwd": "${workspaceFolder}",
             "environment": [],

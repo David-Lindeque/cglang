@@ -23,6 +23,7 @@ namespace cglang
     };
 
     std::ostream& operator <<(std::ostream&, const location&);
+    std::wostream& operator <<(std::wostream&, const location&);
 
     enum class step_kind {
         given,

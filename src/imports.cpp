@@ -85,15 +85,15 @@ bool import_graph::add_import(logger *logger, const location &loc, const wchar_t
     switch(found.size()) {
         case 0:
             if (true) {
-                std::stringstream stm;
-                stm << "The import '" << n << "; could not be found. ";
+                std::wstringstream stm;
+                stm << L"The import '" << w << L"; could not be found. ";
                 if (tries.empty()) {
-                    stm << "No locations was tried.";
+                    stm << L"No locations was tried.";
                 }
                 else {
-                    stm << "Looked at the following locations: ";
+                    stm << L"Looked at the following locations: ";
                     for(auto &t : tries) {
-                        stm << std::endl << "  " << t;
+                        stm << std::endl << L"  " << std::wstring(t.begin(), t.end());
                     }
                 }
                 logger->write_error(loc, stm.str().c_str());
@@ -103,7 +103,7 @@ bool import_graph::add_import(logger *logger, const location &loc, const wchar_t
             fn = *found.begin();
             break;
         default:
-            logger->write_error(loc, ("The import '" + n + "' was found more than once.").c_str());
+            logger->write_error(loc, (L"The import '" + w + L"' was found more than once.").c_str());
             return false;
     }
     _all_files.emplace(fn);
