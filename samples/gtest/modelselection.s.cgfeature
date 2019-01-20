@@ -29,7 +29,7 @@ $headers
 {
     bsl::vector<bsl::string> currencies;
     for(size_t r = 0; r < $0.rows(); r++) {
-        currencies.push_back($0.get(r, "currency"));
+        currencies.push_back($0.get(r, headers::currency));
     }
     select_models(asOfDate, expiryDate, loaded_instruments, currencies, models, warnings);
 }

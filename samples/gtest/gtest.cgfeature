@@ -28,7 +28,8 @@ $helpers
 
 } // anonymous namespace
 
-namespace gtest { // Open the namespace for this module
+// Open the namespace for this module
+namespace gtest {
 
 $tests
 
