@@ -1,32 +1,103 @@
-# implementation of steps
+# A simple sample of using cglang
 
 %file
 {
-#include <blabla>
+#include <string>
+#include <iostream>
+#include <unordered_map>
 
-$finit
+class Bank {
+private:
+    std::unordered_map<std::string, double> _balances;
+public:
+    bool try_open_account(const std::string &acct) {
+        return _balances.emplace(acct, 0.0).second;
+    }
+    bool try_deposit(const std::string &acct, double amount) {
+        auto f = _balances.find(acct);
+        if (f == _balances.end()) {
+            return false;
+        }
+        else {
+            if (amount < 0 && f->second + amount < 0) {
+                return false;
+            }
+            else {
+                f->second += amount;
+                return true;
+            }
+        }
+    }
+    bool try_get_balance(const std::string &acct, double &balance) {
+        auto f = _balances.find(acct);
+        if (f == _balances.end()) {
+            return false;
+        }
+        else {
+            balance = f->second;
+            return true;
+        }
+    }
+};
 
-$tests
+int main(int argc, char *argv[])
+{
+    int total = 0, total_passed = 0;
+
+    $tests
+
+    std::cout << "Total: " << total << std::endl;
+    std::cout << "Passed: " << total_passed << std::endl;
+    std::cout << "Failed: " << (total - total_passed) << std::endl;
+
+    return 0;
+}
 }
 
 %test
 {
-TEST($feature, $scenario)
-{
-    $tinit
-    $steps
-    _->check_memory();
-}
+    {
+        total++;
+        std::cout << "Running $feature.$scenario" << std::endl;
+        Bank bank;
+        bool error = false, passed = true;
+        $steps
+        if (passed) {
+            total_passed++;
+            std::cout << " - OK" << std::endl;
+        }
+        else {
+            std::cout << " - FAILED" << std::endl;
+        }
+    }
 }
 
-'I have an account with account number \'(.+)\' and \$(\d+) of cash'
-{
-    _->open_account("$1", $2);
+# When
+'I open a bank account with number \'(.+)\'' { error |= !bank.try_open_account("$1"); }
+'I deposit £(.+) into \'(.+)\'' { error |= !bank.try_deposit("$2", $1); }
+
+# Then
+'I expect a balance in \'(.+)\' of £(.+)' {
+    double balance;
+    error |= !bank.try_get_balance("$1", balance);
+    if (fabs(balance - $2) > 0.01) {
+        std::cout << "FAILURE: balance incorrect" << std::endl;
+        std::cout << "  Expected: $2" << std::endl;
+        std::cout << "  Actual: " << balance << std::endl;
+        passed = false;
+    }
+}
+'I expect no errors' {
+    if (error) {
+        std::cout << "Did not expect any errors" << std::endl;
+        passed = false;
+    }
 }
 
-%case = insensitive
+Feature: BankFeature
 
-'I transfer \$(\d+) from \'(.+)\' to \'(.+)\''
-{
-    _->transfer($1, "$2", "$3");
-}
+Scenario: OpenAccountAndDeposit
+    When I open a bank account with number 'A1'
+    And I deposit £100 into 'A1'
+    Then I expect a balance in 'A1' of £100
+    And I expect no errors
