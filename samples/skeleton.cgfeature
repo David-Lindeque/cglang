@@ -5,7 +5,7 @@
 #include <string>
 #include <iostream>
 #include <unordered_map>
-
+// We create a 'Bank' class
 class Bank {
 private:
     std::unordered_map<std::string, double> _balances;

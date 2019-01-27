@@ -1,5 +1,5 @@
 # cglang
-A transpiler to generate **C++** code from **Gherkin**. The Gherkin language was slightly enhanced in order to allow a flexible solution easily compatible with generation of **C++** code. Note that I've been using a VSCode Extension **vscode-cglang** for these code snippets.
+A compiler to generate **C++** code from **Gherkin** (C++ from Gherkin LANGuage). The Gherkin language was slightly enhanced in order to allow a flexible solution easily compatible with generation of **C++** code. Note that I've been using a VSCode Extension **vscode-cglang** for these code snippets.
 See [vscode-cglang](https://github.com/David-Lindeque/vscode-cglang) for the extension (and the .vsix file and installation instructions).
 
 ## Gherkin
@@ -11,7 +11,7 @@ of **Scenario**s. A scenario can have any number of steps, but each step must be
 a **Given**, **When** or **Then** step. When steps of the same kind follow each
 other, then the keyword **And** can be used. The idea is to construct the 3 parts of
 a test using these three step types, the three steps being **Arrange**, **Action**
-and **Assert** (The tripple-A of test authoring). A typical **Feature** will look
+and **Assert** (The triple-A of test authoring). A typical **Feature** will look
 something like the following
 ```feature
 # Comments can be created like this.
@@ -81,7 +81,7 @@ Examples:
 # scenarios named DepositAndTransferSuccess1 and DepositAndTransferSuccess2.
 ```
 The **Examples** clause contains an example of a **table**. There are two extensions
-in **Gherken** for step authoring. The first is to attach a **table** to a step, like
+in **Gherkin** for step authoring. The first is to attach a **table** to a step, like
 in this example:
 ```feature
 Scenario: MyTableScenario
@@ -200,7 +200,54 @@ In order to create a **step** skeleton, we use syntax like the following:
 ```
 'I open a bank account with number \'(.+)\'' { error |= !bank.try_open_account("$1"); }
 ``` 
-The compiler will interpret the text between the '...' as a regular expression, and match it to the text of the step. If a match is found, the capture groups of the regex will be available as $1 for the first group, $2 for the second, etc. and the text of the skeleton will be used as the text for the step in the generated code. If the step contains a **table** or a **multiline string**, then that will be available as $0. Note that each step **must** match exactly on regex.
+The compiler will interpret the text between the apostrophes as a regular expression, and match it to the text of the step. If a match is found, the capture groups of the regex will be available as **$1** for the first group, **$2** for the second, etc. and the text of the skeleton will be used as the text for the step in the generated code. If the step contains a **table** or a **multiline string**, then that will be available as **$0**. For **multiline string**, the type of **$0** is ```const char*```, and for a table, the type will be ```cglang::utils::table<n>``` where ```n``` is the number of columns of the table. A c++ header file (cglang.h) is available (https://github.com/David-Lindeque/cglang/blob/master/utils/cglang.h) that defines the template class. Note that each step **must** match exactly on regex.
+
+### cglang::utils::table
+This type supports the use of tables in the generated code. When a step has a
+table attached, that table will be made available to the step skeleton as an
+instance of this type. The type is defined as follows:
+```c++
+template<unsigned int _Cols, class _CharT = char>
+struct table;
+``` 
+The compiler will also generate a struct called ```headers``` for each of these 
+steps, scoped to the step. The ```headers``` struct will contain the indexes
+of each column by name, for instance, the struct might look like this:
+```c++
+struct headers
+{
+    enum
+    {
+        name = 0,
+        ticker = 1,
+        currency = 2
+    };
+};
+``` 
+This helps authoring of step skeleton code, for instance, you might use it like
+this
+```c++
+// A step skeleton with a table attached
+{
+    // Enumerate all rows of a specific column:
+    for(auto it = $0.begin_column(headers::name, 1); it != $0.end_column(headers::name); ++it)
+    {
+        // *it is of type const char* or const wchar_t* (See -w)
+    }
+
+    // Create a set from a column:
+    std::set<std::string> myset($0.begin_column(headers::name, 1), $0.end_column(headers::name));
+    // The second parameter of the begin_column method is the offset (we're skipping the header with 1)
+
+    // number of columns
+    auto cols = $0.cols();
+    // number of rows. Note that row 0 is the headers
+    auto rows = $0.rows();
+
+    // Get a specific cell
+    auto value = $0.get(row, headers::name);
+}
+```
 
 ### defines
 The user can create new **tokens** by using the **%define** operator. When the compiler see a **%define**, it'll immediately resolve all the tokens it can
@@ -241,11 +288,11 @@ The following tokens are available by default
 * $steps: The text of the steps available in the **%test** skeleton
 * $0: The reference to the **table** or **multiline string** available in any **step** skeleton or definition.
 * $x: (where x > 0) is the text of the parameter captured during the regex match of group 'x'.
-* $mydefine: When you created a new variable by using the **%define** operator.
+* $my_define: When you created a new variable by using the **%define** operator.
 
 ### Modules (%import)
 The compiler support a very simple 'modules' solution using the **%import** operator. The compiler will perform a first scan of all files includes on the 
-commandline and also the ones found from **%import** statements. Once that 
+command-line and also the ones found from **%import** statements. Once that 
 first scan is complete, the compiler will determine the order to process files,
 and note that recursive references are not allowed. Another cgfeature file
 can be referenced by either the relative path, or absolute path, and the 
@@ -266,17 +313,18 @@ The regex matcher can be configured using the **%grammar** and **%case** operato
 ```
 See the C++ regex documentation for explanations of the grammar.
 
-## Commandline tool
-The commandline compiler (cglang) will process the file(s) specified on the commandline and generate the c++ output.
+## Command-line tool
+The command-line compiler (cglang) will process the file(s) specified on the command-line and generate the c++ output.
 
 ### Parameters
-The following commandline parameters are available
+The following command-line parameters are available
+
 | parameter | description
 |-- |--
 | -o | Specify the output filename
 | -I | Specify an import search path
 | -w | Specify that you want to use wide character tests
-| --help | Request help of the commandline
+| --help | Request help of the command-line
 
 An example:
 ```bash
