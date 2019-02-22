@@ -5,11 +5,11 @@ YFILES = $(shell find src -name '*.y')
 OBJ = ${SOURCES:src/%.cpp=bin/%.o}
 OBJ += ${LFILES:src/%.l=bin/%.l.o}
 OBJ += ${YFILES:src/%.y=bin/%.y.o}
-GENFILES = ${LFILES:src/%.l=bin/%.l.h}
-GENFILES += ${LFILES:src/%.l=bin/%.l.cpp}
-GENFILES += ${YFILES:src/%.y=bin/%.y.h}
-GENFILES += ${YFILES:src/%.y=bin/%.y.cpp}
-GENFILES += ${YFILES:src/%.y=bin/%.y.output}
+GENFILES = ${LFILES:src/%.l=src/%.l.h}
+GENFILES += ${LFILES:src/%.l=src/%.l.cpp}
+GENFILES += ${YFILES:src/%.y=src/%.y.h}
+GENFILES += ${YFILES:src/%.y=src/%.y.cpp}
+GENFILES += ${YFILES:src/%.y=src/%.y.output}
 
 ifeq ($(OS),Windows_NT)
     # CCFLAGS += -D WIN32
@@ -61,19 +61,19 @@ bin/cglang: $(OBJ)
 bin/%.o: src/%.cpp $(HEADERS)
 	$(CC) -c $< -o $@
 	
-bin/%.y.cpp: src/%.y
+src/%.y.cpp: src/%.y
 	$(BISON) --defines=$(subst .cpp,.h,$@) --report=all -o $@ $<
 
-bin/%.y.o: bin/%.y.cpp $(HEADERS)
+bin/%.y.o: src/%.y.cpp $(HEADERS)
 	$(CC) -c $< -o $@
 
-bin/%.l.cpp: src/%.l src/%.y bin/%.y.cpp $(HEADERS)
+src/%.l.cpp: src/%.l src/%.y src/%.y.cpp $(HEADERS)
 	$(FLEX) --header-file=$(subst .cpp,.h,$@) -o $@ $<
 
-bin/%.l.o: bin/%.l.cpp $(HEADERS)
+bin/%.l.o: src/%.l.cpp $(HEADERS)
 	$(CC) -c $< -o $@
 
-bin/feature.lexer.o: src/feature.lexer.cpp bin/feature.y.cpp $(HEADERS)
+bin/feature.lexer.o: src/feature.lexer.cpp src/feature.y.cpp $(HEADERS)
 	$(CC) -c $< -o $@
 
 clean:

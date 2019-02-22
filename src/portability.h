@@ -30,7 +30,7 @@ namespace cglang
 
 namespace cglang
 {
-	inline int wstrcmp(const wchar_t *str1, const wchar_t *str2) {
+	inline int wstricmp(const wchar_t *str1, const wchar_t *str2) {
 		return ::wcscasecmp(str1, str2);
 	}
 
