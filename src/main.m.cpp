@@ -1,14 +1,18 @@
 #include <stdio.h>
 #include <iostream>
 #include <set>
+#include <regex>
+
 #include "parser.h"
 #include "codegen.h"
 #include "logger.h"
 #include "imports.h"
 #include "file.h"
-#include <regex>
 
 #include "../bin/feature.y.h"
+
+#include "version.h"
+
 extern YYSTYPE yylval;
 extern YYLTYPE yylloc;
 extern FILE* yyin;;
@@ -54,6 +58,11 @@ int main(int argc, char *argv[])
             std::cout << " -o <file> : Specify the output file" << std::endl;
             std::cout << " -I <dir>  : Specify a search directory for imported modules" << std::endl;
             std::cout << " -w        : Specify that the generated files should use wide characters" << std::endl;
+            std::cout << " --version : Show the version" << std::endl;
+            return 0;
+        }
+        else if (strcmp(argv[0], "--version") == 0) {
+            std::cout << "cglang transpiler " << CGLANG_VERSION_MAJOR << "." << CGLANG_VERSION_MINOR << "." << CGLANG_VERSION_PATCH << std::endl;
             return 0;
         }
         else if (strcmp(argv[0], "-o") == 0) {

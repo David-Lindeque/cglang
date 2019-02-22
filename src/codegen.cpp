@@ -335,7 +335,7 @@ bool code_generator::try_add_step_skeleton(const std::string &fn, logger *logger
     std::wregex re;
     std::regex::flag_type flags(_grammar);
     if (!_case_sensitive) {
-        flags |= std::regex_constants::syntax_option_type::icase;
+        flags |= std::regex_constants::icase;
     }
     try {
         re.assign(pattern, flags);

@@ -77,8 +77,8 @@ Examples:
 
 # Note that the first column of the 'Examples' table will be used to create a name
 # for the parameterized tests by appending the value of the column to the back
-# of the scenario outline name, for instance, the above would create two
-# scenarios named DepositAndTransferSuccess1 and DepositAndTransferSuccess2.
+# of the scenario outline name, after appending an underscore (_), for instance, the above would create two
+# scenarios named DepositAndTransferSuccess_1 and DepositAndTransferSuccess_2.
 ```
 The **Examples** clause contains an example of a **table**. There are two extensions
 in **Gherkin** for step authoring. The first is to attach a **table** to a step, like

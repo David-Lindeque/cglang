@@ -1,6 +1,7 @@
 #ifndef __ASTH
 #define __ASTH
 
+#include <vector>
 #include <string>
 #include <memory>
 #include <ostream>

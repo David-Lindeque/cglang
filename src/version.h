@@ -1,0 +1,8 @@
+#ifndef __VERSIONH
+#define __VERSIONH
+
+#define CGLANG_VERSION_MAJOR 1
+#define CGLANG_VERSION_MINOR 0
+#define CGLANG_VERSION_PATCH 0
+
+#endif

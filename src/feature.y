@@ -109,12 +109,12 @@ declaration:
 feature_declaration: "Feature" ":" TOK_IDENTIFIER               { parser->process_feature_declaration($3, reinterpret_cast<const cglang::location&>(@3)); free($3); };
 
 grammar_declaration: 
-      "%grammar" "=" "ECMAScript"                               { parser->set_grammar(std::regex::ECMAScript, reinterpret_cast<const cglang::location&>(@3)); }
-    | "%grammar" "=" "basic"                                    { parser->set_grammar(std::regex::basic, reinterpret_cast<const cglang::location&>(@3)); }
-    | "%grammar" "=" "extended"                                 { parser->set_grammar(std::regex::extended, reinterpret_cast<const cglang::location&>(@3)); }
-    | "%grammar" "=" "awk"                                      { parser->set_grammar(std::regex::awk, reinterpret_cast<const cglang::location&>(@3)); }
-    | "%grammar" "=" "grep"                                     { parser->set_grammar(std::regex::grep, reinterpret_cast<const cglang::location&>(@3)); }
-    | "%grammar" "=" "egrep"                                    { parser->set_grammar(std::regex::egrep, reinterpret_cast<const cglang::location&>(@3)); };
+      "%grammar" "=" "ECMAScript"                               { parser->set_grammar(std::regex_constants::ECMAScript, reinterpret_cast<const cglang::location&>(@3)); }
+    | "%grammar" "=" "basic"                                    { parser->set_grammar(std::regex_constants::basic, reinterpret_cast<const cglang::location&>(@3)); }
+    | "%grammar" "=" "extended"                                 { parser->set_grammar(std::regex_constants::extended, reinterpret_cast<const cglang::location&>(@3)); }
+    | "%grammar" "=" "awk"                                      { parser->set_grammar(std::regex_constants::awk, reinterpret_cast<const cglang::location&>(@3)); }
+    | "%grammar" "=" "grep"                                     { parser->set_grammar(std::regex_constants::grep, reinterpret_cast<const cglang::location&>(@3)); }
+    | "%grammar" "=" "egrep"                                    { parser->set_grammar(std::regex_constants::egrep, reinterpret_cast<const cglang::location&>(@3)); };
 case_declaration:
       "%case" "=" "sensitive"                                   { parser->set_case_sensitive(true, reinterpret_cast<const cglang::location&>(@3)); }
     | "%case" "=" "insensitive"                                 { parser->set_case_sensitive(false, reinterpret_cast<const cglang::location&>(@3)); };

@@ -13,7 +13,7 @@ namespace cglang
 
     class code_generator {
     private:
-        std::regex_constants::syntax_option_type _grammar = std::regex_constants::syntax_option_type::ECMAScript;
+        std::regex_constants::syntax_option_type _grammar = std::regex_constants::ECMAScript;
         bool _case_sensitive = true;
 
         struct span {
