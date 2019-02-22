@@ -2,6 +2,9 @@
 A compiler to generate **C++** code from **Gherkin** (C++ from Gherkin LANGuage). The Gherkin language was slightly enhanced in order to allow a flexible solution easily compatible with generation of **C++** code. Note that I've been using a VSCode Extension **vscode-cglang** for these code snippets.
 See [vscode-cglang](https://github.com/David-Lindeque/vscode-cglang) for the extension (and the .vsix file and installation instructions).
 
+## Getting Started
+Download the binary for your OS from binaries/<version>/<Platform>/<binary>.
+
 ## Gherkin
 
 https://en.wikipedia.org/wiki/Cucumber_(software)
