@@ -3,7 +3,7 @@ A compiler to generate **C++** code from **Gherkin** (C++ from Gherkin LANGuage)
 See [vscode-cglang](https://github.com/David-Lindeque/vscode-cglang) for the extension (and the .vsix file and installation instructions).
 
 ## Getting Started
-Download the binary for your OS from binaries/<version>/<Platform>/<binary>.
+Download the binary for your OS from binaries/<i>version</i>/<i>Platform</i>/<i>binary</i>.
 
 ## Gherkin
 
