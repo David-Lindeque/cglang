@@ -1,5 +1,6 @@
 #include "parser.h"
 #include "ast.h"
+#include "portability.h"
 #include <sstream>
 
 namespace cglang
@@ -40,7 +41,7 @@ void parser::process_error(const location &loc, const char *parser_error, const 
 {
     std::wstringstream stm;
     if (parser_error) {
-        if (strcasecmp(parser_error, "syntax error") != 0) {
+        if (cglang::stricmp(parser_error, "syntax error") != 0) {
             std::string pe(parser_error);
             stm << std::wstring(pe.begin(), pe.end()) << L'.';
             if (lexer_error) stm << L' ';

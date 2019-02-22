@@ -9,9 +9,11 @@
 #include "imports.h"
 #include "file.h"
 
-#include "../bin/feature.y.h"
+#include "feature.y.h"
 
 #include "version.h"
+
+#include "portability.h"
 
 extern YYSTYPE yylval;
 extern YYLTYPE yylloc;
@@ -100,7 +102,7 @@ int main(int argc, char *argv[])
     smart_file outf;
     FILE *out;
     if (o != nullptr) {
-        out = outf.f = fopen(o, "w");
+        out = outf.f = cglang::fopen(o, "w");
         if (!out) {
             std::cerr << "Failure opening '" << o << "' for output." << std::endl;
             return 1;
@@ -119,7 +121,7 @@ int main(int argc, char *argv[])
     else {
         for(auto &fn : inputs) {
             ig.set_current(fn);
-            FILE *f = fopen(fn, "r");
+            FILE *f = cglang::fopen(fn, "r");
             if (f) {
                 if (!try_process_file(fn, f, &ig)) {
                     fclose(f);
@@ -144,7 +146,7 @@ int main(int argc, char *argv[])
         if (!seen.emplace(fn).second) continue;
 
         ig.set_current(fn);
-        FILE *f = fopen(fn.c_str(), "r");
+        FILE *f = cglang::fopen(fn.c_str(), "r");
         if (f) {
             if (!try_process_file(fn.c_str(), f, &ig)) {
                 fclose(f);
@@ -169,7 +171,7 @@ int main(int argc, char *argv[])
     }
 
     for(auto &fn : files) {
-        FILE *f = fopen(fn.c_str(), "r");
+        FILE *f = cglang::fopen(fn.c_str(), "r");
         if (f) {
             if (!try_process_file(fn.c_str(), f, &cg)) {
                 fclose(f);

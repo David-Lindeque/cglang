@@ -32,3 +32,14 @@
 *.app
 
 bin
+
+*.suo
+Browse.VC.db
+Browse.VC.opendb
+*.ipch
+*.vcxproj.user
+Debug
+Release
+*.y.output
+*.y.cpp
+*.y.h

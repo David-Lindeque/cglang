@@ -3,7 +3,8 @@
 #include <string.h>
 #include "ast.h"
 #include "parser.h"
-#include "../bin/feature.y.h"
+#include "feature.y.h"
+#include "portability.h"
 
 FILE* yyin;
 const char *lexer_error = NULL;
@@ -499,27 +500,27 @@ int read_option()
 {
     int v = read_identifier();
     if (v == TOK_IDENTIFIER) {
-        if (wcscasecmp(yylval.str, L"file")==0) {
+        if (cglang::wstricmp(yylval.str, L"file")==0) {
             free(yylval.str);
             return TOK_FILE_SKELETON;
         }
-        else if (wcscasecmp(yylval.str, L"test")==0) {
+        else if (cglang::wstricmp(yylval.str, L"test")==0) {
             free(yylval.str);
             return TOK_TEST_SKELETON;
         }
-        else if (wcscasecmp(yylval.str, L"grammar")==0) {
+        else if (cglang::wstricmp(yylval.str, L"grammar")==0) {
             free(yylval.str);
             return TOK_GRAMMER;
         }
-        else if (wcscasecmp(yylval.str, L"case")==0) {
+        else if (cglang::wstricmp(yylval.str, L"case")==0) {
             free(yylval.str);
             return TOK_CASE;
         }
-        else if (wcscasecmp(yylval.str, L"import")==0) {
+        else if (cglang::wstricmp(yylval.str, L"import")==0) {
             free(yylval.str);
             return TOK_IMPORT;
         }
-        else if (wcscasecmp(yylval.str, L"define")==0) {
+        else if (cglang::wstricmp(yylval.str, L"define")==0) {
             free(yylval.str);
             return TOK_DEFINE;
         }
@@ -638,77 +639,77 @@ int yylex_all()
                 unread(v);
                 int t = read_identifier();
                 if (t == TOK_IDENTIFIER) {
-                    if (wcscasecmp(yylval.str, L"Feature")==0) {
+                    if (cglang::wstricmp(yylval.str, L"Feature")==0) {
                         free(yylval.str);
                         return TOK_FEATURE;
                     }
-                    else if (wcscasecmp(yylval.str, L"Background")==0) {
+                    else if (cglang::wstricmp(yylval.str, L"Background")==0) {
                         free(yylval.str);
                         return TOK_BACKGROUND;
                     }
-                    else if (wcscasecmp(yylval.str, L"Scenario")==0) {
+                    else if (cglang::wstricmp(yylval.str, L"Scenario")==0) {
                         free(yylval.str);
                         return TOK_SCENARIO;
                     }
-                    else if (wcscasecmp(yylval.str, L"Outline")==0) {
+                    else if (cglang::wstricmp(yylval.str, L"Outline")==0) {
                         free(yylval.str);
                         return TOK_OUTLINE;
                     }
-                    else if (wcscasecmp(yylval.str, L"Examples")==0) {
+                    else if (cglang::wstricmp(yylval.str, L"Examples")==0) {
                         free(yylval.str);
                         return TOK_EXAMPLES;
                     }
-                    else if (wcscasecmp(yylval.str, L"ECMAScript")==0) {
+                    else if (cglang::wstricmp(yylval.str, L"ECMAScript")==0) {
                         free(yylval.str);
                         return TOK_ECMASCRIPT;
                     }
-                    else if (wcscasecmp(yylval.str, L"basic")==0) {
+                    else if (cglang::wstricmp(yylval.str, L"basic")==0) {
                         free(yylval.str);
                         return TOK_BASIC;
                     }
-                    else if (wcscasecmp(yylval.str, L"extended")==0) {
+                    else if (cglang::wstricmp(yylval.str, L"extended")==0) {
                         free(yylval.str);
                         return TOK_EXTENDED;
                     }
-                    else if (wcscasecmp(yylval.str, L"awk")==0) {
+                    else if (cglang::wstricmp(yylval.str, L"awk")==0) {
                         free(yylval.str);
                         return TOK_AWK;
                     }
-                    else if (wcscasecmp(yylval.str, L"grep")==0) {
+                    else if (cglang::wstricmp(yylval.str, L"grep")==0) {
                         free(yylval.str);
                         return TOK_GREP;
                     }
-                    else if (wcscasecmp(yylval.str, L"egrep")==0) {
+                    else if (cglang::wstricmp(yylval.str, L"egrep")==0) {
                         free(yylval.str);
                         return TOK_EGREP;
                     }
-                    else if (wcscasecmp(yylval.str, L"sensitive")==0) {
+                    else if (cglang::wstricmp(yylval.str, L"sensitive")==0) {
                         free(yylval.str);
                         return TOK_SENSITIVE;
                     }
-                    else if (wcscasecmp(yylval.str, L"insensitive")==0) {
+                    else if (cglang::wstricmp(yylval.str, L"insensitive")==0) {
                         free(yylval.str);
                         return TOK_INSENSITIVE;
                     }
-                    else if (wcscasecmp(yylval.str, L"given")==0) {
+                    else if (cglang::wstricmp(yylval.str, L"given")==0) {
                         last_step = TOK_GIVEN;
                         // We're reading a step
                         free(yylval.str);
                         return read_step(TOK_GIVEN);
                     }
-                    else if (wcscasecmp(yylval.str, L"when")==0) {
+                    else if (cglang::wstricmp(yylval.str, L"when")==0) {
                         last_step = TOK_WHEN;
                         // We're reading a step
                         free(yylval.str);
                         return read_step(TOK_WHEN);
                     }
-                    else if (wcscasecmp(yylval.str, L"then")==0) {
+                    else if (cglang::wstricmp(yylval.str, L"then")==0) {
                         last_step = TOK_THEN;
                         // We're reading a step
                         free(yylval.str);
                         return read_step(TOK_THEN);
                     }
-                    else if (wcscasecmp(yylval.str, L"and")==0) {
+                    else if (cglang::wstricmp(yylval.str, L"and")==0) {
                         free(yylval.str);
                         return read_step(last_step);
                     }
